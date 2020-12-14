@@ -4,13 +4,16 @@ import { DBConnection } from 'src/constants/db-connection-names';
 import { LotteryController } from './lottery.controller';
 import { LotteryService } from './lottery.service';
 import { User } from './user.entity';
+import { AwardController } from './award.controller';
+import { AwardService } from './award.service';
+import { Award } from './award.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User], DBConnection.machine1),
+    TypeOrmModule.forFeature([User, Award], DBConnection.machine1),
     HttpModule,
   ],
-  controllers: [LotteryController],
-  providers: [LotteryService],
+  controllers: [LotteryController, AwardController],
+  providers: [LotteryService, AwardService],
 })
-export class LotteryModule {}
+export class HYLotteryModule {}

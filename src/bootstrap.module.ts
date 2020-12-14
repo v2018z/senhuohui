@@ -4,6 +4,8 @@ import * as path from 'path';
 
 const ENV = process.env.NODE_ENV;
 
+console.log('__LYG_JAX', ENV); // debug-log
+
 @Module({
   imports: [
     ConfigModule.load(

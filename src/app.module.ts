@@ -5,6 +5,7 @@ import { AppService } from './app.service';
 import { DBConnection } from './constants/db-connection-names';
 import { BootstrapModule } from './bootstrap.module';
 import { LotteryModule } from './lottery/lottery.module';
+import { HYLotteryModule } from './huayang/lottery.module';
 import { TypeOrmConfigService } from './orm-config.server';
 
 @Module({
@@ -15,6 +16,7 @@ import { TypeOrmConfigService } from './orm-config.server';
       useClass: TypeOrmConfigService,
     }),
     LotteryModule,
+    HYLotteryModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,0 +1,19 @@
+{
+  "apps" : [{
+    "name"        : "senhuohui-prod",
+    "script"      : "dist/main.js",
+    "node_args"   : "--harmony",
+    "merge_logs"  : true,
+    "exec_mode"   : "cluster",
+    "instances"   : "max",
+    "instance_var": "INSTANCE_ID",
+    "min_uptime"  : "60s",
+    "max_restarts": 30,
+    "cwd"         : "./",
+    "env_production" : {
+      "NODE_ENV" : "production",
+      "HOST": "0.0.0.0",
+      "FORCE_COLOR": 1
+    }
+  }]
+}
