@@ -2,10 +2,10 @@ import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
 
 const db =
   process.env.NODE_ENV === 'production' ? 'senhuohui' : 'senhuohui-test';
-@Entity('user', { database: db })
+
+@Entity('captcha', { database: db })
 @Index('id', ['id'])
-@Index('phone', ['phone'], { unique: true })
-export class User {
+export class Captcha {
   @PrimaryGeneratedColumn({
     type: 'int',
   })
@@ -19,15 +19,16 @@ export class User {
 
   @Column({
     type: 'varchar',
-    comment: '姓名',
+    comment: '验证码',
   })
-  name: string;
+  captcha: string;
 
   @Column({
-    type: 'varchar',
-    comment: '公司名称',
+    type: 'int',
+    comment: '是否有效',
+    default: 1,
   })
-  company: string;
+  effective: number;
 
   @Column({
     name: 'created_at',

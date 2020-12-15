@@ -6,6 +6,7 @@ import { createHttpExceptionBody } from '../utils/handle-exception-body.util';
  */
 export class BadHandleException extends HttpException {
   constructor(message?: any, statusCode?: number) {
+    console.log('__LYG_JAX', '---222', message); // debug-log
     super(createHttpExceptionBody(message, statusCode), HttpStatus.OK);
   }
 }

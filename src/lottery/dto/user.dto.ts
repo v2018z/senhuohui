@@ -14,4 +14,8 @@ export class UserDTO {
   @IsNotEmpty()
   @IsString()
   company: string;
+
+  createdAt: number;
+
+  updatedAt: number;
 }

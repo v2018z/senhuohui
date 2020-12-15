@@ -85,20 +85,4 @@ export class LotteryController implements CrudController<User> {
   // deleteOneBase?(@ParsedRequest() req: CrudRequest): Promise<void | User> {
   //   throw new Error('Method not implemented.');
   // }
-
-  @Get('query_swfc_by_phone')
-  async querySwfcByPhone(@Query('phone') phone: string): Promise<any> {
-    // try {
-    //   await this.switchCfgService.setUpSwitchCfgByPost(+postSwitch + 1);
-    //   // 通知其他端刷新配置项
-    //   this.switchCfgService.reloadSwitches();
-    // } catch (ex) {
-    //   return new BadHandleException(ex.msg);
-    // }
-    const data = await this.service.querySwfcByPhone(phone);
-
-    // console.log('__LYG_JAX', data); // debug-log
-
-    return data;
-  }
 }

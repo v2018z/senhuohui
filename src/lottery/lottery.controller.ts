@@ -1,18 +1,21 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Query, Post, Body } from '@nestjs/common';
 import {
-  CreateManyDto,
   Crud,
   CrudController,
   CrudRequest,
-  CrudService,
   Override,
-  GetManyDefaultResponse,
   ParsedBody,
   ParsedRequest,
 } from '@nestjsx/crud';
 import { User } from './user.entity';
-// import { UserDTO } from './dto/user.dto';
 import { LotteryService } from './lottery.service';
+import { BadHandleException } from '../common/exceptions/bad-handle.exception';
+import { UserDTO } from './dto/user.dto';
+import { CaptchaService } from './captcha.service';
+import { Captcha } from './captcha.entity';
+import { CaptchaDTO } from './dto/captcha.dto';
+import { SwitchService } from './switch.service';
+import { AwardService } from './award.service';
 
 @Crud({
   model: {
@@ -21,57 +24,112 @@ import { LotteryService } from './lottery.service';
 })
 @Controller('users')
 export class LotteryController implements CrudController<User> {
-  constructor(public service: LotteryService) {}
-  // getManyBase?(
-  //   @ParsedRequest() req: CrudRequest,
-  // ): Promise<GetManyDefaultResponse<User> | User[]> {
-  //   throw new Error('Method not implemented.');
-  // }
+  constructor(
+    public service: LotteryService,
+    public captchaService: CaptchaService,
+    public switchService: SwitchService,
+    public awardService: AwardService,
+  ) {}
 
-  // getOneBase?(@ParsedRequest() req: CrudRequest): Promise<User> {
-  //   throw new Error('Method not implemented.');
-  // }
-
-  // @Override('createOneBase')
-  // createOneBase?(
-  //   @ParsedRequest() req: CrudRequest,
-  //   @ParsedBody() dto: UserDTO,
-  // ): Promise<User> {
-  //   throw new Error('Method not implemented.');
-  // }
-
-  // createManyBase?(
-  //   @ParsedRequest() req: CrudRequest,
-  //   dto: CreateManyDto<User>,
-  // ): Promise<User[]> {
-  //   throw new Error('Method not implemented.');
-  // }
-
-  // updateOneBase?(@ParsedRequest() req: CrudRequest, dto: User): Promise<User> {
-  //   throw new Error('Method not implemented.');
-  // }
-
-  // replaceOneBase?(@ParsedRequest() req: CrudRequest, dto: User): Promise<User> {
-  //   throw new Error('Method not implemented.');
-  // }
-
-  // deleteOneBase?(@ParsedRequest() req: CrudRequest): Promise<void | User> {
-  //   throw new Error('Method not implemented.');
-  // }
+  get base(): CrudController<User> {
+    return this;
+  }
 
   @Get('query_swfc_by_phone')
   async querySwfcByPhone(@Query('phone') phone: string): Promise<any> {
-    // try {
-    //   await this.switchCfgService.setUpSwitchCfgByPost(+postSwitch + 1);
-    //   // 通知其他端刷新配置项
-    //   this.switchCfgService.reloadSwitches();
-    // } catch (ex) {
-    //   return new BadHandleException(ex.msg);
-    // }
-    const data = await this.service.querySwfcByPhone(phone);
+    try {
+      const { data } = await this.service.querySwfcByPhone(phone);
+      return data;
+    } catch (error) {
+      throw new BadHandleException();
+    }
+  }
 
-    // console.log('__LYG_JAX', data); // debug-log
+  @Post('sendCaptcha')
+  async sendCaptcha(@Body('phone') phone: string): Promise<any> {
+    try {
+      const randomCaptcha = (
+        '000000' + Math.floor(Math.random() * 999999)
+      ).slice(-4);
+      try {
+        await this.captchaService.send(phone, randomCaptcha);
+        const captcha = new Captcha();
+        captcha.phone = phone;
+        captcha.captcha = randomCaptcha;
+        this.captchaService.insertCaptchaInfo(captcha);
+      } catch (ex) {
+        throw new BadHandleException('验证码发送失败');
+      }
+    } catch (error) {
+      console.log('__LYG_JAX', '发验证码', error); // debug-log
+      throw new BadHandleException();
+    }
+  }
 
-    return data;
+  @Post('login')
+  async login(@Body() dto: CaptchaDTO): Promise<any> {
+    const phone = dto.phone;
+    const captcha = dto.captcha;
+
+    if (!/^(?:(?:\+|00)86)?1\d{10}$/.test(phone)) {
+      throw new BadHandleException('您输入的手机号有误');
+    }
+
+    const data = await this.captchaService.findCaptchaInfo(phone, 1);
+
+    if (!data) {
+      throw new BadHandleException('请发送验证码后再试');
+    }
+
+    if (data.effective == 2) {
+      throw new BadHandleException('验证码已失效，请重新发送验证码');
+    }
+
+    if (captcha == data.captcha) {
+      this.captchaService.deleteCaptchaInfo(data);
+      const switchObj = await this.switchService.getSwitch();
+      const isSwitch = switchObj ? switchObj.switch : 1;
+      return { switch: isSwitch == 2 };
+    } else {
+      throw new BadHandleException('请输入正确的验证码');
+    }
+  }
+
+  @Get('lottery')
+  async lottery(@Query('phone') phone: string): Promise<any> {
+    try {
+      const userAward = await this.awardService.getAward(phone);
+      const switchObj = await this.switchService.getSwitch();
+      const isSwitch = switchObj ? switchObj.switch : 1;
+      console.log('__LYG_JAX', userAward); // debug-log
+      if (userAward) {
+        return {
+          switch: isSwitch == 2,
+          isWin: true,
+          level: userAward.level,
+          award: userAward.award,
+        };
+      }
+      return { isWin: false };
+    } catch (error) {
+      new BadHandleException('网络不给力');
+    }
+  }
+
+  @Override('createOneBase')
+  async createOne(
+    @ParsedRequest() req: CrudRequest,
+    @ParsedBody() dto: UserDTO,
+  ): Promise<User> {
+    const phone = dto.phone;
+    if (!/^(?:(?:\+|00)86)?1\d{10}$/.test(phone)) {
+      throw new BadHandleException('您输入的手机号有误');
+    }
+    const data = await this.service.getUserByPhone(phone);
+    if (data) {
+      throw new BadHandleException('您已经参与过抽奖');
+    }
+    const user = this.base.createOneBase(req, dto);
+    return user;
   }
 }

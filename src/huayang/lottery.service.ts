@@ -16,19 +16,4 @@ export class LotteryService extends TypeOrmCrudService<User> {
   ) {
     super(repo);
   }
-
-  querySwfcByPhone(phone) {
-    const md5str = `${phone}swfcgood`;
-    const sign = MD5(md5str);
-    const time = ~~(Date.now() / 1000);
-    const base64str = `${phone}|${sign}|${time}`;
-    console.log('__LYG_JAX', base64str); // debug-log
-    const token = base64encode(base64str);
-    console.log('__LYG_JAX', token); // debug-log
-    // return this.httpService
-    //   .get(
-    //     `https://www.swfcfoodgarden.com/api/web/query_swfc_by_phone/${token}`,
-    //   )
-    //   .toPromise();
-  }
 }
