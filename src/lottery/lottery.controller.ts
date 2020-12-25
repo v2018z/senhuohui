@@ -110,7 +110,7 @@ export class LotteryController implements CrudController<User> {
           award: userAward.award,
         };
       }
-      return { isWin: false };
+      return { isWin: false, switch: isSwitch == 2 };
     } catch (error) {
       new BadHandleException('网络不给力');
     }
