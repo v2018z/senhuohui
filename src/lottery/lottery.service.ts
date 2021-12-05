@@ -24,7 +24,7 @@ export class LotteryService extends TypeOrmCrudService<User> {
       .getOne();
   }
 
-  querySwfcByPhone(phone) {
+  querySwfcByPhone(phone): any {
     const md5str = `${phone}swfcfood`;
     const sign = MD5(md5str);
     const time = ~~(Date.now() / 1000);

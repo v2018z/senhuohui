@@ -16,7 +16,7 @@ import { TypeOrmConfigService } from './orm-config.server';
       useClass: TypeOrmConfigService,
     }),
     LotteryModule,
-    HYLotteryModule,
+    // HYLotteryModule,
   ],
   controllers: [AppController],
   providers: [AppService],

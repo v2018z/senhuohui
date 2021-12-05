@@ -34,9 +34,11 @@ export class CaptchaService extends TypeOrmCrudService<Captcha> {
     return new Promise((resolve, reject) => {
       client.request('SendSms', params, { method: 'POST' }).then(
         (result) => {
+          console.log('result', result);
           resolve(result);
         },
         (ex) => {
+          console.log('result-error', ex);
           reject(ex);
         },
       );
