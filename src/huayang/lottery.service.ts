@@ -4,8 +4,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
 import { DBConnection } from 'src/constants/db-connection-names';
-import * as MD5 from 'md5';
-import { base64encode } from 'nodejs-base64';
 
 @Injectable()
 export class LotteryService extends TypeOrmCrudService<User> {
