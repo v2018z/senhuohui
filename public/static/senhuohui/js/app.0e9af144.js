@@ -284,7 +284,7 @@
             {
               key: 'apiBaseURL',
               value: function () {
-                return 'http://shinejoy.xyz/';
+                return 'http://www.shinejoy.xyz/';
               },
             },
             {
