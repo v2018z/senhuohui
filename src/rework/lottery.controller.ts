@@ -58,46 +58,6 @@ export class LotteryController implements CrudController<User> {
     }
   }
 
-  // @Post('login')
-  // @Transaction({
-  //   connectionName: DBConnection.machine1,
-  // })
-  // async login(
-  //   @Body() dto: CaptchaDTO,
-  //   @TransactionManager() manager: EntityManager,
-  // ): Promise<any> {
-  //   const phone = dto.phone;
-  //   const captcha = dto.captcha;
-
-  //   if (!/^(?:(?:\+|00)86)?1\d{10}$/.test(phone)) {
-  //     throw new BadHandleException('您输入的手机号有误');
-  //   }
-
-  //   const data = await this.captchaService.findCaptchaInfo(phone, 1);
-
-  //   if (!data) {
-  //     throw new BadHandleException('请发送验证码后再试');
-  //   }
-
-  //   if (data.effective == 2) {
-  //     throw new BadHandleException('验证码已失效，请重新发送验证码');
-  //   }
-
-  //   if (captcha == data.captcha) {
-  //     this.captchaService.deleteCaptchaInfo(data);
-  //     try {
-  //       return await this.service.lottery(phone, manager);
-  //     } catch (error) {
-  //       throw new BadHandleException(
-  //         error.message ?? '服务器开小差了',
-  //         error.code,
-  //       );
-  //     }
-  //   } else {
-  //     throw new BadHandleException('请输入正确的验证码');
-  //   }
-  // }
-
   @Post('login')
   @Transaction({
     connectionName: DBConnection.machine1,
@@ -113,31 +73,18 @@ export class LotteryController implements CrudController<User> {
       throw new BadHandleException('您输入的手机号有误');
     }
 
-    try {
-      return await this.service.lottery(phone, manager);
-    } catch (error) {
-      throw new BadHandleException(
-        error.message ?? '服务器开小差了',
-        error.code,
-      );
-    }
-  }
+    const data = await this.captchaService.findCaptchaInfo(phone, 1);
 
-  @Post('login-test')
-  @Transaction({
-    connectionName: DBConnection.machine1,
-  })
-  async loginTest(
-    @Body() dto: CaptchaDTO,
-    @TransactionManager() manager: EntityManager,
-  ): Promise<any> {
-    const phone = dto.phone;
-
-    if (!/^(?:(?:\+|00)86)?1\d{10}$/.test(phone)) {
-      throw new BadHandleException('您输入的手机号有误');
+    if (!data) {
+      throw new BadHandleException('请发送验证码后再试');
     }
 
-    if (1 == 1) {
+    if (data.effective == 2) {
+      throw new BadHandleException('验证码已失效，请重新发送验证码');
+    }
+
+    if (captcha == data.captcha) {
+      this.captchaService.deleteCaptchaInfo(data);
       try {
         return await this.service.lottery(phone, manager);
       } catch (error) {
@@ -150,6 +97,59 @@ export class LotteryController implements CrudController<User> {
       throw new BadHandleException('请输入正确的验证码');
     }
   }
+
+  // @Post('login')
+  // @Transaction({
+  //   connectionName: DBConnection.machine1,
+  // })
+  // async login(
+  //   @Body() dto: CaptchaDTO,
+  //   @TransactionManager() manager: EntityManager,
+  // ): Promise<any> {
+  //   const phone = dto.phone;
+  //   const captcha = dto.captcha;
+
+  //   if (!/^(?:(?:\+|00)86)?1\d{10}$/.test(phone)) {
+  //     throw new BadHandleException('您输入的手机号有误');
+  //   }
+
+  //   try {
+  //     return await this.service.lottery(phone, manager);
+  //   } catch (error) {
+  //     throw new BadHandleException(
+  //       error.message ?? '服务器开小差了',
+  //       error.code,
+  //     );
+  //   }
+  // }
+
+  // @Post('login-test')
+  // @Transaction({
+  //   connectionName: DBConnection.machine1,
+  // })
+  // async loginTest(
+  //   @Body() dto: CaptchaDTO,
+  //   @TransactionManager() manager: EntityManager,
+  // ): Promise<any> {
+  //   const phone = dto.phone;
+
+  //   if (!/^(?:(?:\+|00)86)?1\d{10}$/.test(phone)) {
+  //     throw new BadHandleException('您输入的手机号有误');
+  //   }
+
+  //   if (1 == 1) {
+  //     try {
+  //       return await this.service.lottery(phone, manager);
+  //     } catch (error) {
+  //       throw new BadHandleException(
+  //         error.message ?? '服务器开小差了',
+  //         error.code,
+  //       );
+  //     }
+  //   } else {
+  //     throw new BadHandleException('请输入正确的验证码');
+  //   }
+  // }
 
   // @Post('login-test-2')
   // async loginTest1(@Body() dto: CaptchaDTO): Promise<any> {
