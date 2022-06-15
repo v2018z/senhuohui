@@ -8,26 +8,26 @@
      礼品A中奖区间[0, 10), 礼品B中奖区间[10, 60), 礼品C中奖区间[60, 200), 不中奖区间[200, 250)
      所落的区间，礼品没库存了，也当做没中奖
  */
+// 模拟礼品
+const goods = [
+  { id: 1, name: 'A', stock: 3, total: 3 },
+  { id: 2, name: 'B', stock: 3, total: 3 },
+  { id: 3, name: 'C', stock: 3, total: 3 },
+];
+const threshold = 0.7; // 总中奖概率
+
 const luck1Action = () => {
-  // 模拟礼品
-  const goods = [
-    { name: 'A', stock: 10, total: 10 },
-    { name: 'B', stock: 50, total: 50 },
-    { name: 'C', stock: 140, total: 140 },
-  ];
-  // 每个礼品的中奖情况
-  const lucks = [
-    { name: 'A', luck: 0 },
-    { name: 'B', luck: 0 },
-    { name: 'C', luck: 0 },
-    { name: '没中', luck: 0 },
-  ];
-  const threshold = 0.7; // 总中奖概率
-  const tal = 200; // 礼品总数
-  const num = tal / threshold; // 随机数范围 = 礼品总数 / 总中奖率
-  console.log('num', num);
   // 模拟num次抽奖
   // 随机数发生
+  const allGoods = goods.filter((g) => g.stock > 0);
+
+  if (allGoods.length == 0) {
+    console.log('活动结束');
+    return;
+  }
+
+  const tal = allGoods.length; // 礼品总数
+  const num = tal / threshold; // 随机数范围 = 礼品总数 / 总中奖率
   const random = Math.round(Math.random() * (num - 1));
   // 随机数发生在没中奖的范围
   if (random >= tal) {
@@ -35,25 +35,28 @@ const luck1Action = () => {
     return;
   }
   let cur = 0;
+
   // eslint-disable-next-line no-plusplus
-  for (let j = 0; j < goods.length; j++) {
-    const next = cur + goods[j].total;
+  for (let j = 0; j < allGoods.length; j++) {
+    const good = allGoods[j];
+    const next = cur + good.total;
     // 随机数落在奖品的区间
     if (cur <= random && random < next) {
-      // 所落的区间，礼品没库存了
-      if (goods[j].stock <= 0) {
-        console.log(`【没库存】: ${goods[j].name}, 随机数是${random}`);
-        break;
-      }
+      // // 所落的区间，礼品没库存了
+      // if (allGoods[j].stock <= 0) {
+      //   console.log(`【没库存】: ${good.name}, 随机数是${random}`);
+      //   break;
+      // }
       // 中奖
-      console.log(`中奖: ${goods[j].name}, 随机数是${random}`);
-      goods[j].stock -= 1; // 中奖减库存
+      console.log(`中奖: ${allGoods[j].name}, 随机数是${random}`);
+      console.count('-----------------');
+      goods.find((item) => item.id === good.id).stock -= 1; // 中奖减库存
       break;
     }
     cur = next;
   }
 };
 
-for (let i = 0; i < 100; i++) {
+for (let i = 0; i < 1; i++) {
   luck1Action();
 }

@@ -8,8 +8,8 @@ export class UserDTO {
   phone: string;
 
   @IsNotEmpty()
-  @IsString()
-  name: string;
+  @IsNumber()
+  awardId: number;
 
   createdAt: number;
 

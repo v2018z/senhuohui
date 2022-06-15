@@ -13,4 +13,13 @@ export class AwardService extends TypeOrmCrudService<Award> {
   ) {
     super(repo);
   }
+
+  getAll() {
+    return this.repo.find();
+  }
+
+  reduceStock(id: number, award: Award) {
+    award.stock -= 1;
+    return this.repo.update(id, award);
+  }
 }

@@ -1,20 +1,14 @@
 import { Controller, Get, Query, Post, Body } from '@nestjs/common';
-import {
-  Crud,
-  CrudController,
-  CrudRequest,
-  Override,
-  ParsedBody,
-  ParsedRequest,
-} from '@nestjsx/crud';
+import { Crud, CrudController } from '@nestjsx/crud';
+import { Transaction, EntityManager, TransactionManager } from 'typeorm';
 import { User } from './user.entity';
 import { LotteryService } from './lottery.service';
 import { BadHandleException } from '../common/exceptions/bad-handle.exception';
-import { UserDTO } from './dto/user.dto';
 import { CaptchaService } from './captcha.service';
 import { Captcha } from './captcha.entity';
 import { CaptchaDTO } from './dto/captcha.dto';
 import { AwardService } from './award.service';
+import { DBConnection } from '../constants/db-connection-names';
 
 @Crud({
   model: {
@@ -64,8 +58,54 @@ export class LotteryController implements CrudController<User> {
     }
   }
 
+  // @Post('login')
+  // @Transaction({
+  //   connectionName: DBConnection.machine1,
+  // })
+  // async login(
+  //   @Body() dto: CaptchaDTO,
+  //   @TransactionManager() manager: EntityManager,
+  // ): Promise<any> {
+  //   const phone = dto.phone;
+  //   const captcha = dto.captcha;
+
+  //   if (!/^(?:(?:\+|00)86)?1\d{10}$/.test(phone)) {
+  //     throw new BadHandleException('您输入的手机号有误');
+  //   }
+
+  //   const data = await this.captchaService.findCaptchaInfo(phone, 1);
+
+  //   if (!data) {
+  //     throw new BadHandleException('请发送验证码后再试');
+  //   }
+
+  //   if (data.effective == 2) {
+  //     throw new BadHandleException('验证码已失效，请重新发送验证码');
+  //   }
+
+  //   if (captcha == data.captcha) {
+  //     this.captchaService.deleteCaptchaInfo(data);
+  //     try {
+  //       return await this.service.lottery(phone, manager);
+  //     } catch (error) {
+  //       throw new BadHandleException(
+  //         error.message ?? '服务器开小差了',
+  //         error.code,
+  //       );
+  //     }
+  //   } else {
+  //     throw new BadHandleException('请输入正确的验证码');
+  //   }
+  // }
+
   @Post('login')
-  async login(@Body() dto: CaptchaDTO): Promise<any> {
+  @Transaction({
+    connectionName: DBConnection.machine1,
+  })
+  async login(
+    @Body() dto: CaptchaDTO,
+    @TransactionManager() manager: EntityManager,
+  ): Promise<any> {
     const phone = dto.phone;
     const captcha = dto.captcha;
 
@@ -73,43 +113,99 @@ export class LotteryController implements CrudController<User> {
       throw new BadHandleException('您输入的手机号有误');
     }
 
-    const data = await this.captchaService.findCaptchaInfo(phone, 1);
+    try {
+      return await this.service.lottery(phone, manager);
+    } catch (error) {
+      throw new BadHandleException(
+        error.message ?? '服务器开小差了',
+        error.code,
+      );
+    }
+  }
 
-    if (!data) {
-      throw new BadHandleException('请发送验证码后再试');
+  @Post('login-test')
+  @Transaction({
+    connectionName: DBConnection.machine1,
+  })
+  async loginTest(
+    @Body() dto: CaptchaDTO,
+    @TransactionManager() manager: EntityManager,
+  ): Promise<any> {
+    const phone = dto.phone;
+
+    if (!/^(?:(?:\+|00)86)?1\d{10}$/.test(phone)) {
+      throw new BadHandleException('您输入的手机号有误');
     }
 
-    if (data.effective == 2) {
-      throw new BadHandleException('验证码已失效，请重新发送验证码');
-    }
-
-    if (captcha == data.captcha) {
-      this.captchaService.deleteCaptchaInfo(data);
-      return data;
+    if (1 == 1) {
+      try {
+        return await this.service.lottery(phone, manager);
+      } catch (error) {
+        throw new BadHandleException(
+          error.message ?? '服务器开小差了',
+          error.code,
+        );
+      }
     } else {
       throw new BadHandleException('请输入正确的验证码');
     }
   }
 
-  @Get('lottery')
-  async lottery(@Query('phone') phone: string): Promise<any> {
-    return Promise.reject();
-  }
+  // @Post('login-test-2')
+  // async loginTest1(@Body() dto: CaptchaDTO): Promise<any> {
+  //   const phone = dto.phone;
 
-  @Override('createOneBase')
-  async createOne(
-    @ParsedRequest() req: CrudRequest,
-    @ParsedBody() dto: UserDTO,
-  ): Promise<User> {
-    const phone = dto.phone;
+  //   if (!/^(?:(?:\+|00)86)?1\d{10}$/.test(phone)) {
+  //     throw new BadHandleException('您输入的手机号有误');
+  //   }
+
+  //   if (1 == 1) {
+  //     try {
+  //       return await this.service.lottery(phone);
+  //     } catch (error) {
+  //       throw new BadHandleException(
+  //         error.message ?? '服务器开小差了',
+  //         error.code,
+  //       );
+  //     }
+  //   } else {
+  //     throw new BadHandleException('请输入正确的验证码');
+  //   }
+  // }
+
+  @Get('user')
+  async user(@Query('phone') phone: string): Promise<any> {
     if (!/^(?:(?:\+|00)86)?1\d{10}$/.test(phone)) {
       throw new BadHandleException('您输入的手机号有误');
     }
-    const data = await this.service.getUserByPhone(phone);
-    if (data) {
-      throw new BadHandleException('您已经参与过抽奖');
+    try {
+      const user = await this.service.getUserByPhone(phone);
+      return user ?? null;
+    } catch (error) {
+      throw new BadHandleException('用户查询错误');
     }
-    const user = this.base.createOneBase(req, dto);
-    return user;
+  }
+
+  @Get('awards')
+  async award(): Promise<any> {
+    return await this.awardService.getAll();
+  }
+
+  @Post('lottery')
+  @Transaction({
+    connectionName: DBConnection.machine1,
+  })
+  async lottery(
+    @Body('phone') phone: string,
+    @TransactionManager() manager: EntityManager,
+  ): Promise<any> {
+    try {
+      return await this.service.lottery(phone, manager);
+    } catch (error) {
+      throw new BadHandleException(
+        error.message ?? '服务器开小差了',
+        error.code,
+      );
+    }
   }
 }

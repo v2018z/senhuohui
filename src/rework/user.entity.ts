@@ -21,10 +21,20 @@ export class User {
   phone: string;
 
   @Column({
-    type: 'varchar',
-    comment: '姓名',
+    name: 'award_id',
+    type: 'int',
+    comment: '奖品ID',
+    nullable: true,
   })
-  name: string;
+  awardId: number;
+
+  @Column({
+    name: 'award',
+    type: 'varchar',
+    comment: '奖品名称',
+    nullable: true,
+  })
+  award: string;
 
   @Column({
     name: 'created_at',

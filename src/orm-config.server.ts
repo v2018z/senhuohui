@@ -14,6 +14,7 @@ export class TypeOrmConfigService implements TypeOrmOptionsFactory {
       entities: [`${__dirname}/**/*.entity{.ts,.js}`],
       logging: this.config.get('machine.logging'),
       synchronize: this.config.get('machine.synchronize'),
+      keepConnectionAlive: true,
       replication: {
         // 更新、写入
         master: {
