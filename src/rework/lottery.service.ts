@@ -52,7 +52,6 @@ export class LotteryService extends TypeOrmCrudService<User> {
   }
 
   async lottery(phone: string, manager: EntityManager): Promise<any> {
-    console.time('abc__');
     try {
       const awards = await manager
         .createQueryBuilder(Award, 'award')
@@ -92,8 +91,6 @@ export class LotteryService extends TypeOrmCrudService<User> {
 
       const lotteryRandom = Math.round(Math.random() * (calcAwards.length - 1));
       const winingAward = calcAwards[lotteryRandom];
-
-      console.log('抽奖随机', lotteryRandom);
 
       if (winingAward) {
         try {

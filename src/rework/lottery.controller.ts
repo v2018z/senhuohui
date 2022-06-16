@@ -4,6 +4,7 @@ import { Transaction, EntityManager, TransactionManager } from 'typeorm';
 import { User } from './user.entity';
 import { LotteryService } from './lottery.service';
 import { BadHandleException } from '../common/exceptions/bad-handle.exception';
+import { ServiceException } from '../common/exceptions/service.exception';
 import { CaptchaService } from './captcha.service';
 import { Captcha } from './captcha.entity';
 import { CaptchaDTO } from './dto/captcha.dto';
@@ -200,6 +201,10 @@ export class LotteryController implements CrudController<User> {
     @TransactionManager() manager: EntityManager,
   ): Promise<any> {
     try {
+      const user = await this.service.getUserByPhone(phone);
+      if (!user) {
+        throw new ServiceException('用户未抽过奖', -400);
+      }
       return await this.service.lottery(phone, manager);
     } catch (error) {
       throw new BadHandleException(
