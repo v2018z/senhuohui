@@ -4,6 +4,6 @@ echo -e "\n•••••••••••••••••••••••
 
 yarn
 
-yarn prebuild
+yarn prestart
 
 pm2 reload ./deploy/ecosystem-production.json --env production
