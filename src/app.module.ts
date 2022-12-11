@@ -4,7 +4,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DBConnection } from './constants/db-connection-names';
 import { BootstrapModule } from './bootstrap.module';
-import { ReworkModule } from './rework/rework.module';
+import { LotteryModule } from './lottery2022/lottery.module';
 import { TypeOrmConfigService } from './orm-config.server';
 
 @Module({
@@ -14,7 +14,7 @@ import { TypeOrmConfigService } from './orm-config.server';
       name: DBConnection.machine1,
       useClass: TypeOrmConfigService,
     }),
-    ReworkModule,
+    LotteryModule,
   ],
   controllers: [AppController],
   providers: [AppService],
