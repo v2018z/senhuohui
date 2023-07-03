@@ -8,7 +8,7 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.enableCors();
   app.useStaticAssets(join(__dirname, '../public/', 'static'), {
-    prefix: '/pps',
+    prefix: '/static',
   });
   app.useStaticAssets(join(__dirname, '../public/', 'huayang'), {
     prefix: '/huayang',
