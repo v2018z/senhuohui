@@ -7,8 +7,8 @@ import { TransformInterceptor } from './common/interceptors/transform.intercepto
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.enableCors();
-  app.useStaticAssets(join(__dirname, '../public/', 'public'), {
-    prefix: '/static',
+  app.useStaticAssets(join(__dirname, '../public/', 'static'), {
+    prefix: '/pps',
   });
   app.useStaticAssets(join(__dirname, '../public/', 'huayang'), {
     prefix: '/huayang',
