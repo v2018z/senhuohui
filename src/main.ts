@@ -3,12 +3,11 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import { join } from 'path';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
-import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.enableCors();
-  app.useStaticAssets(join(__dirname, '../public/', 'static'), {
+  app.useStaticAssets(join(__dirname, '../public/', 'public'), {
     prefix: '/static',
   });
   app.useStaticAssets(join(__dirname, '../public/', 'huayang'), {
