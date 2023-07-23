@@ -10,11 +10,17 @@
  */
 // 模拟礼品
 const goods = [
-  { id: 1, name: 'A', stock: 3, total: 3 },
-  { id: 2, name: 'B', stock: 3, total: 3 },
-  { id: 3, name: 'C', stock: 3, total: 3 },
+  { id: 1, name: 'A', stock: 5, total: 5 },
+  { id: 2, name: 'B', stock: 26, total: 26 },
+  { id: 3, name: 'C', stock: 85, total: 85 },
+  { id: 4, name: 'D', stock: 359, total: 359 },
+  { id: 5, name: 'E', stock: 328, total: 328 },
+  { id: 6, name: 'F', stock: 160, total: 160 },
+  { id: 7, name: 'G', stock: 5, total: 5 },
+  { id: 8, name: 'H', stock: 197, total: 197 },
+  { id: 9, name: 'I', stock: 35, total: 35 },
 ];
-const threshold = 0.7; // 总中奖概率
+const threshold = 1; // 总中奖概率
 
 const luck1Action = () => {
   // 模拟num次抽奖
@@ -57,6 +63,6 @@ const luck1Action = () => {
   }
 };
 
-for (let i = 0; i < 1; i++) {
+for (let i = 0; i < 800; i++) {
   luck1Action();
 }
