@@ -84,9 +84,6 @@ export class LotteryService extends TypeOrmCrudService<User> {
 
       const user = await getUserByPhone(phone);
 
-      if (!user && calcAwards.length == 0) {
-        throw new ServiceException('活动已结束!', -300);
-      }
       if (!user) {
         throw new ServiceException('用户信息有误!', -301);
       } else {
@@ -103,7 +100,7 @@ export class LotteryService extends TypeOrmCrudService<User> {
       const random = Math.round(Math.random() * (num - 1));
       console.log('tal', tal, random);
       // 随机数发生在没中奖的范围
-      if (random >= tal) {
+      if (random >= tal || calcAwards.length == 0) {
         user.awardId = -2;
         user.award = '未中奖';
         user.awardStatus = 1;
@@ -143,11 +140,6 @@ export class LotteryService extends TypeOrmCrudService<User> {
 
   async checkActicity(phone: string, manager: EntityManager): Promise<any> {
     try {
-      const awards = await manager
-        .createQueryBuilder(Award, 'award')
-        .setLock('pessimistic_write')
-        .getMany();
-
       const getUserByPhone = (phone: string) => {
         return manager
           .createQueryBuilder(User, 'user')
@@ -157,13 +149,7 @@ export class LotteryService extends TypeOrmCrudService<User> {
           .getOne();
       };
 
-      const calcAwards = awards.filter((g) => g.stock > 0);
-
       const user = await getUserByPhone(phone);
-
-      if (calcAwards.length == 0) {
-        throw new ServiceException('活动已结束!', -300);
-      }
 
       return user;
     } catch (error) {

@@ -4,4 +4,5 @@ export const createHttpExceptionBody = (
 ) => ({
   code: statusCode,
   message,
+  msg: message,
 });
