@@ -45,7 +45,9 @@ export class LotteryController implements CrudController<User> {
         '000000' + Math.floor(Math.random() * 999999)
       ).slice(-4);
       try {
-        await this.captchaService.send(phone, randomCaptcha);
+        if (process.env.NODE_ENV !== 'development') {
+          await this.captchaService.send(phone, randomCaptcha);
+        }
         const captcha = new Captcha();
         captcha.phone = phone;
         captcha.captcha = randomCaptcha;

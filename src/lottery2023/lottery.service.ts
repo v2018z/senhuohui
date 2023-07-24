@@ -80,11 +80,9 @@ export class LotteryService extends TypeOrmCrudService<User> {
           .getOne();
       };
 
-      const calcAwards = awards.filter((g) => g.stock > 0);
-
       const user = await getUserByPhone(phone);
 
-      if (!user) {
+      if (!user || !user.id) {
         throw new ServiceException('用户信息有误!', -301);
       } else {
         if (user.award) {
@@ -92,15 +90,10 @@ export class LotteryService extends TypeOrmCrudService<User> {
         }
       }
 
-      // 总中奖概率
-      const threshold = 0.5;
-      // 礼品总数
-      const tal = calcAwards.reduce((a, b) => a + b.quantity, 0);
-      const num = tal / threshold; // 随机数范围 = 礼品总数 / 总中奖率
-      const random = Math.round(Math.random() * (num - 1));
-      console.log('tal', tal, random);
-      // 随机数发生在没中奖的范围
-      if (random >= tal || calcAwards.length == 0) {
+      const availableAwards = awards.filter((g) => g.stock > 0);
+      const randomNum = Math.random();
+
+      if (randomNum > 0.5 || availableAwards.length <= 0) {
         user.awardId = -2;
         user.award = '未中奖';
         user.awardStatus = 1;
@@ -113,10 +106,10 @@ export class LotteryService extends TypeOrmCrudService<User> {
         }
       }
 
-      const lotteryRandom = Math.round(Math.random() * (calcAwards.length - 1));
-      const winingAward = calcAwards[lotteryRandom];
+      const randomIndex = Math.floor(Math.random() * availableAwards.length);
+      const winingAward = availableAwards[randomIndex];
 
-      if (winingAward) {
+      if (winingAward && winingAward.stock > 0) {
         try {
           // 中奖减库存
           winingAward.stock -= 1;
@@ -129,9 +122,10 @@ export class LotteryService extends TypeOrmCrudService<User> {
           ]);
           return user;
         } catch (error) {
-          console.log(error);
           throw new ServiceException('抽奖异常，请重试!', -203);
         }
+      } else {
+        throw new ServiceException('抽奖异常，请重试!', -203);
       }
     } catch (error) {
       throw error;
