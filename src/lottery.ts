@@ -11,7 +11,8 @@ const prizes = [
   { id: 9, name: '保温杯', stock: 35 },
 ];
 
-const drawTimes = 1200;
+const drawTimes = 100;
+const winProbability = 0.9;
 
 // 抽奖函数
 function drawLottery() {
@@ -19,16 +20,18 @@ function drawLottery() {
 
   const currPrices = prizes.filter((p) => p.stock > 0); // 过滤出库存大于0的奖品
 
-  if (randomNum <= 0.5 && currPrices.length > 0) {
-    // 50%中奖率
-    const randomIndex = Math.floor(Math.random() * currPrices.length); // 随机生成奖品下标
-    const prize = currPrices[randomIndex]; // 根据奖品下标找到对应奖品
-    if (prize.stock > 0) {
-      // 更新奖品库存
-      prize.stock--;
-      console.log('prize', prize);
-      return prize.name; // 返回中奖奖品名字
-    }
+  if (randomNum > winProbability || currPrices.length <= 0) {
+    return '未中奖'; // 如果没有任何奖品中奖或库存不足，则返回未中奖
+  }
+
+  // 50%中奖率
+  const randomIndex = Math.floor(Math.random() * currPrices.length); // 随机生成奖品下标
+  const prize = currPrices[randomIndex]; // 根据奖品下标找到对应奖品
+  if (prize.stock > 0) {
+    // 更新奖品库存
+    prize.stock--;
+    console.log(currPrices.length, 'index: ', randomIndex, 'prize', prize);
+    return prize.name; // 返回中奖奖品名字
   }
 
   // for (const prize of prizes) {
@@ -40,8 +43,6 @@ function drawLottery() {
   //   }
   // }
   console.log('randomNum', randomNum, '未中奖 ');
-
-  return '未中奖'; // 如果没有任何奖品中奖或库存不足，则返回未中奖
 }
 
 let winningCount = 0;

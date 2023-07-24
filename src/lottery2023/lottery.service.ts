@@ -93,7 +93,7 @@ export class LotteryService extends TypeOrmCrudService<User> {
       const availableAwards = awards.filter((g) => g.stock > 0);
       const randomNum = Math.random();
 
-      if (randomNum > 0.5 || availableAwards.length <= 0) {
+      if (randomNum > 1 || availableAwards.length <= 0) {
         user.awardId = -2;
         user.award = '未中奖';
         user.awardStatus = 1;
