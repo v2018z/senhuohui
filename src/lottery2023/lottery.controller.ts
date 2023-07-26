@@ -10,6 +10,7 @@ import { Captcha } from './captcha.entity';
 import { CaptchaDTO } from './dto/captcha.dto';
 import { AwardService } from './award.service';
 import { DBConnection } from '../constants/db-connection-names';
+import { PrizeService } from './prize.service';
 
 @Crud({
   model: {
@@ -22,6 +23,7 @@ export class LotteryController implements CrudController<User> {
     public service: LotteryService,
     public captchaService: CaptchaService,
     public awardService: AwardService,
+    public prizeService: PrizeService,
   ) {}
 
   get base(): CrudController<User> {
@@ -115,9 +117,9 @@ export class LotteryController implements CrudController<User> {
     return this.service.checkActicity(phone, manager);
   }
 
-  @Get('awards')
-  async award(): Promise<any> {
-    return await this.awardService.getAll();
+  @Get('prizes')
+  async prizes(): Promise<any> {
+    return await this.prizeService.getAll();
   }
 
   @Post('lottery')
