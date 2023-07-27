@@ -122,6 +122,21 @@ export class LotteryController implements CrudController<User> {
     return await this.prizeService.getAll();
   }
 
+  @Get('awards')
+  async awards(): Promise<any> {
+    return await this.awardService.getAll();
+  }
+
+  @Get('users')
+  async users(): Promise<any> {
+    return await this.service.getAllUser();
+  }
+
+  @Post('users/remove')
+  async removeUsers(): Promise<any> {
+    return await this.service.removeUsers();
+  }
+
   @Post('lottery')
   @Transaction({
     connectionName: DBConnection.machine1,
@@ -151,6 +166,21 @@ export class LotteryController implements CrudController<User> {
   ): Promise<any> {
     try {
       return this.service.receive(userId, hxm);
+    } catch (error) {
+      throw new BadHandleException(
+        error.message ?? '服务器开小差了',
+        error.code,
+      );
+    }
+  }
+
+  @Post('changeAawardStock')
+  async changeAawardStock(
+    @Body('id') id: string,
+    @Body('num') num: number,
+  ): Promise<any> {
+    try {
+      return this.service.changeAawardStock(id, num);
     } catch (error) {
       throw new BadHandleException(
         error.message ?? '服务器开小差了',

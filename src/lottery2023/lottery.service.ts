@@ -179,4 +179,22 @@ export class LotteryService extends TypeOrmCrudService<User> {
       throw error;
     }
   }
+
+  changeAawardStock(awardId: string, stock: number) {
+    console.log(awardId, stock);
+    return this.repo
+      .createQueryBuilder()
+      .update(Award)
+      .set({ stock })
+      .where('id = :awardId', { awardId })
+      .execute();
+  }
+
+  getAllUser() {
+    return this.repo.createQueryBuilder('user').getMany();
+  }
+
+  removeUsers() {
+    return this.repo.createQueryBuilder('user').delete().execute();
+  }
 }
