@@ -93,6 +93,7 @@ export class LotteryService extends TypeOrmCrudService<User> {
 
       const control = await manager
         .createQueryBuilder(Control, 'control')
+        .setLock('pessimistic_write')
         .getOne();
 
       let probability = control.probability;
