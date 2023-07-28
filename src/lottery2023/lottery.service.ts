@@ -10,6 +10,7 @@ import { base64encode } from 'nodejs-base64';
 import { AwardService } from './award.service';
 import { ServiceException } from '../common/exceptions/service.exception';
 import { Award } from './award.entity';
+import { Control } from './control.entity';
 
 @Injectable()
 export class LotteryService extends TypeOrmCrudService<User> {
@@ -90,10 +91,26 @@ export class LotteryService extends TypeOrmCrudService<User> {
         }
       }
 
+      const control = await manager
+        .createQueryBuilder(Control, 'control')
+        .getOne();
+
+      let probability = control.probability;
+
+      if (probability > 1) {
+        probability = 1;
+      }
+
+      if (probability === null || typeof probability === 'undefined') {
+        probability = 0.5;
+      }
+
       const availableAwards = awards.filter((g) => g.stock > 0);
       const randomNum = Math.random();
 
-      if (randomNum > 0.5 || availableAwards.length <= 0) {
+      console.log('=====当前概率======', control, probability, randomNum);
+
+      if (randomNum > probability || availableAwards.length <= 0) {
         user.awardId = -2;
         user.award = '未中奖';
         user.awardStatus = 1;

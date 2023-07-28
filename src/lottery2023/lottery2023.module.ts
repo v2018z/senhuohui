@@ -10,6 +10,7 @@ import { PrizeService } from './prize.service';
 import { CaptchaService } from './captcha.service';
 import { LotteryController } from './lottery.controller';
 import { LotteryService } from './lottery.service';
+import { Control } from './control.entity';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { LotteryService } from './lottery.service';
     TypeOrmModule.forFeature([Captcha], DBConnection.machine1),
     TypeOrmModule.forFeature([Award], DBConnection.machine1),
     TypeOrmModule.forFeature([Prize], DBConnection.machine1),
+    TypeOrmModule.forFeature([Control], DBConnection.machine1),
     HttpModule,
   ],
   controllers: [LotteryController],
