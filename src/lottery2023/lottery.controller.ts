@@ -189,4 +189,28 @@ export class LotteryController implements CrudController<User> {
       );
     }
   }
+
+  @Get('control')
+  async control(): Promise<any> {
+    try {
+      return this.service.getControl();
+    } catch (error) {
+      throw new BadHandleException(
+        error.message ?? '服务器开小差了',
+        error.code,
+      );
+    }
+  }
+
+  @Post('control/change')
+  async changeControl(@Body('num') num): Promise<any> {
+    try {
+      return this.service.changeControl(num);
+    } catch (error) {
+      throw new BadHandleException(
+        error.message ?? '服务器开小差了',
+        error.code,
+      );
+    }
+  }
 }

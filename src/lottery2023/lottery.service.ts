@@ -215,4 +215,17 @@ export class LotteryService extends TypeOrmCrudService<User> {
   removeUsers() {
     return this.repo.createQueryBuilder('user').delete().execute();
   }
+
+  getControl() {
+    return this.repo.createQueryBuilder('control').getOne();
+  }
+
+  changeControl(probability: number) {
+    return this.repo
+      .createQueryBuilder()
+      .update(Control)
+      .set({ probability })
+      .where('id = :id', { id: 1 })
+      .execute();
+  }
 }
