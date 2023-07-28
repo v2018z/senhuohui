@@ -15,7 +15,7 @@ export default {
       },
     ],
   },
-  synchronize: process.env.TYPEORM_SYNCHRONIZE,
+  synchronize: process.env.TYPEORM_SYNCHRONIZE === 'true',
   logging: process.env.TYPEORM_LOGGING === 'true',
   entities: '',
   migrations: process.env.TYPEORM_MIGRATIONS.split('|'),

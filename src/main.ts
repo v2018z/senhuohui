@@ -3,6 +3,9 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import { join } from 'path';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
+import config from './config/app';
+
+console.log(config);
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -15,6 +18,7 @@ async function bootstrap() {
   });
   // app.useGlobalPipes(new ValidationPipe());
   app.useGlobalInterceptors(new TransformInterceptor());
-  await app.listen(3000);
+  await app.listen(config.port);
+  console.log(`服务已启动: prost ${config.port}`);
 }
 bootstrap();
