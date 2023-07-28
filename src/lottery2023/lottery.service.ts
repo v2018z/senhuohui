@@ -216,11 +216,12 @@ export class LotteryService extends TypeOrmCrudService<User> {
     return this.repo.createQueryBuilder('user').delete().execute();
   }
 
-  getControl() {
-    return this.repo.createQueryBuilder('control').getOne();
+  getControl(manager: EntityManager) {
+    return manager.createQueryBuilder(Control, 'control').getOne();
   }
 
   changeControl(probability: number) {
+    console.log('prod', probability);
     return this.repo
       .createQueryBuilder()
       .update(Control)

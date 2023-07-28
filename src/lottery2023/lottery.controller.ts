@@ -191,9 +191,12 @@ export class LotteryController implements CrudController<User> {
   }
 
   @Get('control')
-  async control(): Promise<any> {
+  @Transaction({
+    connectionName: DBConnection.machine1,
+  })
+  async control(@TransactionManager() manager: EntityManager): Promise<any> {
     try {
-      return this.service.getControl();
+      return this.service.getControl(manager);
     } catch (error) {
       throw new BadHandleException(
         error.message ?? '服务器开小差了',
