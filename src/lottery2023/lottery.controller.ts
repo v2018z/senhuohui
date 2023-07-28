@@ -34,6 +34,7 @@ export class LotteryController implements CrudController<User> {
   async querySwfcByPhone(@Query('phone') phone: string): Promise<any> {
     try {
       const { data } = await this.service.querySwfcByPhone(phone);
+      console.log(data);
       return data;
     } catch (error) {
       throw new BadHandleException();
