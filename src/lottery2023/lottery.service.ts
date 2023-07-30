@@ -1,7 +1,7 @@
 import { HttpService, Injectable } from '@nestjs/common';
 import { TypeOrmCrudService } from '@nestjsx/crud-typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Between, MoreThan, Repository } from 'typeorm';
 import { User } from './user.entity';
 import { DBConnection } from '../constants/db-connection-names';
 import { EntityManager } from 'typeorm';
@@ -11,6 +11,7 @@ import { AwardService } from './award.service';
 import { ServiceException } from '../common/exceptions/service.exception';
 import { Award } from './award.entity';
 import { Control } from './control.entity';
+import { LotteryLog } from './lottery-log.entity';
 
 @Injectable()
 export class LotteryService extends TypeOrmCrudService<User> {
@@ -96,6 +97,9 @@ export class LotteryService extends TypeOrmCrudService<User> {
         .setLock('pessimistic_write')
         .getOne();
 
+      const participantsCount = await this.countParticipantsForToday(manager);
+      const awardCount = await this.countWinnersForToday(manager);
+
       let probability = control.probability;
 
       if (probability > 1) {
@@ -110,13 +114,50 @@ export class LotteryService extends TypeOrmCrudService<User> {
       const randomNum = Math.random();
 
       console.log('=====当前概率======', control, probability, randomNum);
+      console.log('=====当前抽奖人数======', participantsCount);
+      console.log('=====当前中奖人数======', awardCount);
+      console.log(
+        '=====control.participantsCount======',
+        control.participantsCount,
+      );
+      console.log('=====control.maxWinners======', control.maxWinners);
 
-      if (randomNum > probability || availableAwards.length <= 0) {
+      if (
+        randomNum > probability ||
+        availableAwards.length <= 0 ||
+        participantsCount >= control.participantsCount ||
+        awardCount >= control.maxWinners
+      ) {
         user.awardId = -2;
         user.award = '未中奖';
         user.awardStatus = 1;
+
+        let failureReason = '';
+
+        if (randomNum > probability) {
+          failureReason = '随机数未命中中奖概率';
+        } else if (availableAwards.length <= 0) {
+          failureReason = '奖品已发放完毕';
+        } else if (participantsCount >= control.participantsCount) {
+          failureReason = '抽奖人数已达上限';
+        } else if (awardCount >= control.maxWinners) {
+          failureReason = '今日奖品数量已达上限';
+        }
+
+        const newLogEntry = new LotteryLog();
+        newLogEntry.userId = user.id;
+        newLogEntry.phone = user.phone;
+        newLogEntry.currentProbability = probability;
+        newLogEntry.lotteryProbability = randomNum;
+        newLogEntry.awardId = -2;
+        newLogEntry.award = '未中奖';
+        newLogEntry.failureReason = failureReason;
+
         try {
-          await manager.update(User, user.id, user);
+          await Promise.all([
+            manager.update(User, user.id, user),
+            manager.save(LotteryLog, newLogEntry),
+          ]);
           return user;
         } catch (error) {
           console.log(error);
@@ -134,9 +175,19 @@ export class LotteryService extends TypeOrmCrudService<User> {
           user.awardId = winingAward.id;
           user.award = winingAward.award;
           user.awardStatus = 0;
+
+          const newLogEntry = new LotteryLog();
+          newLogEntry.userId = user.id;
+          newLogEntry.phone = user.phone;
+          newLogEntry.currentProbability = probability;
+          newLogEntry.lotteryProbability = randomNum;
+          newLogEntry.awardId = winingAward.id;
+          newLogEntry.award = winingAward.award;
+
           await Promise.all([
             manager.update(Award, winingAward.id, winingAward),
             manager.update(User, user.id, user),
+            manager.save(LotteryLog, newLogEntry),
           ]);
           return user;
         } catch (error) {
@@ -228,5 +279,36 @@ export class LotteryService extends TypeOrmCrudService<User> {
       .set({ probability })
       .where('id = :id', { id: 1 })
       .execute();
+  }
+
+  // 查询当天抽奖人数
+  async countParticipantsForToday(
+    entityManager: EntityManager,
+  ): Promise<number> {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // 设置为当天的 00:00:00
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1); // 设置为第二天的 00:00:00
+
+    const count = await entityManager.count(LotteryLog, {
+      lotteryTime: Between(today, tomorrow),
+    });
+
+    return count;
+  }
+
+  // 查询当天已中奖的人数
+  async countWinnersForToday(entityManager: EntityManager): Promise<number> {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // 设置为当天的 00:00:00
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1); // 设置为第二天的 00:00:00
+
+    const count = await entityManager.count(LotteryLog, {
+      lotteryTime: Between(today, tomorrow),
+      awardId: MoreThan(0), // 假设 awardId 大于 0 代表中奖了
+    });
+
+    return count;
   }
 }

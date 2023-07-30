@@ -18,4 +18,20 @@ export class Control {
     default: 0.5,
   })
   probability: number;
+
+  @Column({
+    name: 'participants_count',
+    type: 'integer',
+    default: 0,
+    comment: '当前抽奖人数',
+  })
+  participantsCount: number;
+
+  @Column({
+    name: 'max_winners',
+    type: 'integer',
+    default: 0,
+    comment: '最大奖品数',
+  })
+  maxWinners: number;
 }

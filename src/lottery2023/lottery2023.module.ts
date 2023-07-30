@@ -11,6 +11,7 @@ import { CaptchaService } from './captcha.service';
 import { LotteryController } from './lottery.controller';
 import { LotteryService } from './lottery.service';
 import { Control } from './control.entity';
+import { LotteryLog } from './lottery-log.entity';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { Control } from './control.entity';
     TypeOrmModule.forFeature([Award], DBConnection.machine1),
     TypeOrmModule.forFeature([Prize], DBConnection.machine1),
     TypeOrmModule.forFeature([Control], DBConnection.machine1),
+    TypeOrmModule.forFeature([LotteryLog], DBConnection.machine1),
     HttpModule,
   ],
   controllers: [LotteryController],
