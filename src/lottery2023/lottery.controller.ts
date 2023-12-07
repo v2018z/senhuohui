@@ -1,4 +1,12 @@
-import { Controller, Get, Query, Post, Body } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Query,
+  Post,
+  Body,
+  Header,
+  UseInterceptors,
+} from '@nestjs/common';
 import { Crud, CrudController } from '@nestjsx/crud';
 import { Transaction, EntityManager, TransactionManager } from 'typeorm';
 import { User } from './user.entity';
@@ -11,6 +19,7 @@ import { CaptchaDTO } from './dto/captcha.dto';
 import { AwardService } from './award.service';
 import { DBConnection } from '../constants/db-connection-names';
 import { PrizeService } from './prize.service';
+import { TransformInterceptor } from 'src/common/interceptors/transform.interceptor';
 
 @Crud({
   model: {
@@ -30,17 +39,19 @@ export class LotteryController implements CrudController<User> {
     return this;
   }
 
+  @UseInterceptors(TransformInterceptor)
   @Get('query_swfc_by_phone')
   async querySwfcByPhone(@Query('phone') phone: string): Promise<any> {
     try {
       const { data } = await this.service.querySwfcByPhone(phone);
-      console.log(data);
+      console.log(phone, data);
       return data;
     } catch (error) {
       throw new BadHandleException();
     }
   }
 
+  @UseInterceptors(TransformInterceptor)
   @Post('sendCaptcha')
   async sendCaptcha(@Body('phone') phone: string): Promise<any> {
     try {
@@ -64,6 +75,7 @@ export class LotteryController implements CrudController<User> {
     }
   }
 
+  @UseInterceptors(TransformInterceptor)
   @Post('login')
   async login(@Body() dto: CaptchaDTO): Promise<any> {
     const phone = dto.phone;
@@ -91,6 +103,7 @@ export class LotteryController implements CrudController<User> {
     return this.service.insertUser(phone);
   }
 
+  @UseInterceptors(TransformInterceptor)
   @Get('user')
   async user(@Query('phone') phone: string): Promise<any> {
     if (!/^(?:(?:\+|00)86)?1\d{10}$/.test(phone)) {
@@ -104,6 +117,7 @@ export class LotteryController implements CrudController<User> {
     }
   }
 
+  @UseInterceptors(TransformInterceptor)
   @Get('check_activity')
   @Transaction({
     connectionName: DBConnection.machine1,
@@ -118,26 +132,31 @@ export class LotteryController implements CrudController<User> {
     return this.service.checkActicity(phone, manager);
   }
 
+  @UseInterceptors(TransformInterceptor)
   @Get('prizes')
   async prizes(): Promise<any> {
     return await this.prizeService.getAll();
   }
 
+  @UseInterceptors(TransformInterceptor)
   @Get('awards')
   async awards(): Promise<any> {
     return await this.awardService.getAll();
   }
 
+  @UseInterceptors(TransformInterceptor)
   @Get('users')
   async users(): Promise<any> {
     return await this.service.getAllUser();
   }
 
+  @UseInterceptors(TransformInterceptor)
   @Post('users/remove')
   async removeUsers(): Promise<any> {
     return await this.service.removeUsers();
   }
 
+  @UseInterceptors(TransformInterceptor)
   @Post('lottery')
   @Transaction({
     connectionName: DBConnection.machine1,
@@ -160,6 +179,7 @@ export class LotteryController implements CrudController<User> {
     }
   }
 
+  @UseInterceptors(TransformInterceptor)
   @Post('receive')
   async receive(
     @Body('userId') userId: string,
@@ -175,6 +195,7 @@ export class LotteryController implements CrudController<User> {
     }
   }
 
+  @UseInterceptors(TransformInterceptor)
   @Post('changeAawardStock')
   async changeAawardStock(
     @Body('id') id: string,
@@ -190,6 +211,7 @@ export class LotteryController implements CrudController<User> {
     }
   }
 
+  @UseInterceptors(TransformInterceptor)
   @Get('control')
   @Transaction({
     connectionName: DBConnection.machine1,
@@ -205,10 +227,24 @@ export class LotteryController implements CrudController<User> {
     }
   }
 
+  @UseInterceptors(TransformInterceptor)
   @Post('control/change')
   async changeControl(@Body('num') num): Promise<any> {
     try {
       return this.service.changeControl(num);
+    } catch (error) {
+      throw new BadHandleException(
+        error.message ?? '服务器开小差了',
+        error.code,
+      );
+    }
+  }
+
+  @Header('Content-Type', 'text/html')
+  @Get('summary')
+  async summary(): Promise<any> {
+    try {
+      return this.service.summary();
     } catch (error) {
       throw new BadHandleException(
         error.message ?? '服务器开小差了',

@@ -286,7 +286,7 @@ export class LotteryService extends TypeOrmCrudService<User> {
     entityManager: EntityManager,
   ): Promise<number> {
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // 设置为当天的 00:00:00
+    today.setUTCHours(0, 0, 0, 0); // 设置为当天的 00:00:00
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1); // 设置为第二天的 00:00:00
 
@@ -300,7 +300,7 @@ export class LotteryService extends TypeOrmCrudService<User> {
   // 查询当天已中奖的人数
   async countWinnersForToday(entityManager: EntityManager): Promise<number> {
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // 设置为当天的 00:00:00
+    today.setUTCHours(0, 0, 0, 0); // 设置为当天的 00:00:00
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1); // 设置为第二天的 00:00:00
 
@@ -310,5 +310,49 @@ export class LotteryService extends TypeOrmCrudService<User> {
     });
 
     return count;
+  }
+
+  async summary() {
+    // 查询所有抽奖的人数
+    const participantsCount = await this.repo.count({
+      awardStatus: MoreThan(-1),
+    });
+    // 查询所有中奖的人数
+    const winnersCount = await this.repo.count({
+      awardId: MoreThan(0),
+    });
+    // 查询领奖总人数
+    const receivedCount = await this.repo
+      .createQueryBuilder('user')
+      .where('user.awardStatus = 1')
+      .andWhere('user.awardId > 0')
+      .getCount();
+
+    return `
+      <html>
+        <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+        <head>
+          <style>
+            p {
+              font-size: 24px;
+            }
+          </style>
+        </head>
+        <body>
+          <p>
+            总抽奖人数: 
+            <span style="color: red;">${participantsCount}</span>
+          </p>
+          <p>
+            总中奖人数:
+            <span style="color: red;">${winnersCount}</span>
+          </p>
+          <p>
+            总领奖人数:
+            <span style="color: red;">${receivedCount}</span>
+          </p>
+        </body>
+      </html>
+    `;
   }
 }
